@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 // Define custom colors to be used throughout the app for easy maintenance.
 class AppColors {
   static const Color background = Color(0xFFF8F9FA); // Light grey for the background
-  static const Color surface = Color(0xFFF9F9F9);    // White for card surfaces
+  static const Color surface = Color(0xFFF9F9F8);    // White for card surfaces
   static const Color primaryText = Color(0xFF212529); // Nearly black for primary text
   static const Color secondaryText = Color(0xFF6C757D); // Grey for secondary text
   static const Color success = Color(0xFF28A745);     // Green for positive balances/change
