@@ -4,12 +4,12 @@ import 'package:google_fonts/google_fonts.dart';
 // Define custom colors to be used throughout the app for easy maintenance.
 class AppColors {
   static const Color background = Color(0xFFF8F9FA); // Light grey for the background
-  static const Color surface = Color(0xFFF9F9F8);    // White for card surfaces
-  static const Color primaryText = Color(0xFF212529); // Nearly black for primary text
-  static const Color secondaryText = Color(0xFF6C757D); // Grey for secondary text
-  static const Color success = Color(0xFF28A745);     // Green for positive balances/change
-  static const Color warning = Color(0xFFDC3545);     // Red for negative/due change
-  static const Color cardBorder = Color(0xFFDEE2E6);  // Light border color for cards
+  static const Color surface = Color(0xFFECECEC);    // White for card surfaces
+  static const Color primaryText = Colors.black; // Nearly black for primary text
+  static const Color secondaryText = Color(0xFF333333); // Grey for secondary text
+  static const Color success = Color(0xFF45915F);     // Green for positive balances/change
+  static const Color warning = Color(0xFFB15541);     // Red for negative/due change
+  static const Color cardBorder = Color(0xFF0D1B2A);  // Light border color for cards
 }
 
 /// A class to hold the application's theme data.
