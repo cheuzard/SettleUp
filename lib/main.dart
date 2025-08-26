@@ -101,7 +101,7 @@ class _PaymentTrackerState extends State<PaymentTracker> {
                   },
                   onPersonLongPressEnd: () {
                     setState(() {
-                      selectedIndex = null;
+                      //TODO add the popup or changing info
                     });
                   },
                 ),
@@ -110,16 +110,29 @@ class _PaymentTrackerState extends State<PaymentTracker> {
           ),
 
           // Blur everything EXCEPT the selected card
-          if (selectedIndex != null)
-            Positioned.fill(
+          Positioned.fill(
+            child: IgnorePointer(
+              ignoring: selectedIndex == null,
               child: GestureDetector(
-                onTap: () => setState(() => selectedIndex = null),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-                  child: Container(color: Colors.black.withValues(alpha: 0.1)),
+                onTap: () => setState(() {
+                  selectedIndex = null;
+                }),
+                child: AnimatedOpacity(
+                  opacity: selectedIndex != null ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 350),
+                  child: GestureDetector(
+                    onTap: () => setState(() => selectedIndex = null),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 2.5, sigmaY: 2.5),
+                      child: Container(
+                        color: Colors.black.withValues(alpha: 0.07),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
+          ),
         ],
       ),
     );
