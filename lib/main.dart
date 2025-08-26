@@ -30,18 +30,95 @@ class PaymentTracker extends StatefulWidget {
 
 class _PaymentTrackerState extends State<PaymentTracker> {
   bool extended = true;
-  final List<Person> people = [
-    Person('Bob', 100, 20),
-    Person('Alice', 120, 25),
-    Person('Charlie', 90, 18),
-    Person('Diana', 110, 30),
-    Person('Ethan', 95, 22),
-    Person('Fiona', 105, 28),
-    Person('George', 40, 100),
-    Person('Hannah', 115, 27),
-    Person('Ian', 98, 21),
-    Person('Julia', 102, 26),
-  ];
+  final List<Person> people = [];
+  void addPerson(Person p) {
+    setState(() => people.add(p));
+  }
+
+  void updatePerson(int index, Person p) {
+    setState(() => people[index] = p);
+  }
+
+  Future<void> _showPersonSheet(
+    BuildContext context, {
+    Person? person,
+    int? index,
+  }) async {
+    final nameController = TextEditingController(text: person?.name ?? "");
+    final owesController = TextEditingController(
+      text: person?.owes.toString() ?? "",
+    );
+    final paidController = TextEditingController(
+      text: person?.paid.toString() ?? "",
+    );
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 16,
+            right: 16,
+            top: 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                person == null ? "Add Person" : "Edit Person",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 16),
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(labelText: "Name"),
+              ),
+              SizedBox(height: 8),
+              TextField(
+                controller: owesController,
+                decoration: InputDecoration(labelText: "Owes"),
+                keyboardType: TextInputType.number,
+              ),
+              SizedBox(height: 8),
+              TextField(
+                controller: paidController,
+                decoration: InputDecoration(labelText: "Paid"),
+                keyboardType: TextInputType.number,
+              ),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  final newPerson = Person(
+                    nameController.text,
+                    double.tryParse(owesController.text) ?? 0,
+                    double.tryParse(paidController.text) ?? 0,
+                  );
+
+                  Navigator.pop(context, newPerson); // pass data back
+                },
+                child: Text("Save"),
+              ),
+              SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    ).then((result) {
+      if (result is Person) {
+        if (person == null) {
+          addPerson(result);
+        } else if (index != null) {
+          updatePerson(index, result);
+        }
+        _calculateTotals();
+      }
+    });
+  }
 
   double _totalOwed = 0;
   double _collectedAmount = 0;
@@ -58,7 +135,7 @@ class _PaymentTrackerState extends State<PaymentTracker> {
     double totalSum = 0;
     double collectedSum = 0;
     for (var person in people) {
-      totalSum += person.owed;
+      totalSum += person.owes;
       collectedSum += person.paid;
     }
     setState(() {
@@ -99,11 +176,15 @@ class _PaymentTrackerState extends State<PaymentTracker> {
                       selectedIndex = index;
                     });
                   },
-                  onPersonLongPressEnd: () {
+                  onPersonLongPressEnd: ({person, index}) {
+                    _showPersonSheet(context, person: person, index: index);
                     setState(() {
-                      //TODO add the popup or changing info
+                      selectedIndex = null;
                     });
                   },
+
+                  // onPersonLongPressEnd: ({person, index}) =>
+                  //     _showPersonSheet(context, person: person, index: index),
                 ),
               ),
             ],
@@ -130,6 +211,22 @@ class _PaymentTrackerState extends State<PaymentTracker> {
                     ),
                   ),
                 ),
+              ),
+            ),
+          ),
+          Positioned(
+            right: 20,
+            bottom: 20,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.cardBorder, width: 2.3),
+                borderRadius: BorderRadius.circular(17),
+              ),
+              child: FloatingActionButton(
+                backgroundColor: AppColors.background,
+                foregroundColor: AppColors.primaryText,
+                onPressed: () => _showPersonSheet(context),
+                child: Icon(Icons.add),
               ),
             ),
           ),
@@ -301,7 +398,7 @@ class _PeopleList extends StatelessWidget {
   final int? selectedIndex;
   final Function(int) onPersonDismissed;
   final Function(int) onPersonLongPress;
-  final VoidCallback onPersonLongPressEnd;
+  final Function({Person? person, int? index}) onPersonLongPressEnd;
 
   const _PeopleList({
     required this.people,
@@ -314,6 +411,7 @@ class _PeopleList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       clipBehavior: Clip.antiAlias,
       decoration: const BoxDecoration(
         borderRadius: BorderRadius.only(
@@ -329,52 +427,76 @@ class _PeopleList extends StatelessWidget {
           topLeft: Radius.circular(35),
           topRight: Radius.circular(35),
         ),
-        child: ListView.builder(
-          padding: const EdgeInsets.only(top: 6),
-          itemCount: people.length,
-          itemBuilder: (context, index) {
-            final item = people[index];
-            bool isSelected = selectedIndex == index;
+        child: people.isNotEmpty
+            ? ListView.builder(
+                padding: const EdgeInsets.only(top: 6),
+                itemCount: people.length,
+                itemBuilder: (context, index) {
+                  final p = people[index];
+                  bool isSelected = selectedIndex == index;
 
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-              child: Stack(
-                alignment: Alignment.centerRight,
-                children: [
-                  Positioned.fill(
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                      ),
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Padding(
-                          padding: EdgeInsets.only(right: 20.0),
-                          child: Icon(Icons.delete, color: Colors.white),
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 5,
+                    ),
+                    child: Stack(
+                      alignment: Alignment.centerRight,
+                      children: [
+                        Positioned.fill(
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(20),
+                              ),
+                            ),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Padding(
+                                padding: EdgeInsets.only(right: 20.0),
+                                child: Icon(Icons.delete, color: Colors.white),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                        Dismissible(
+                          key: Key(p.name),
+                          direction: DismissDirection.endToStart,
+                          onDismissed: (direction) => onPersonDismissed(index),
+                          child: GestureDetector(
+                            onLongPress: () => onPersonLongPress(index),
+                            onLongPressEnd: (details) {
+                              onPersonLongPressEnd(person: p, index: index);
+                            },
+                            child: AnimatedScale(
+                              scale: isSelected ? 1.03 : 1,
+                              duration: const Duration(milliseconds: 140),
+                              child: PersonCard(p),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
+                  );
+                },
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.account_circle, // Or any profile-related icon
+                    size: 80,
+                    color: Colors.grey[400],
                   ),
-                  Dismissible(
-                    key: Key(item.name),
-                    direction: DismissDirection.endToStart,
-                    onDismissed: (direction) => onPersonDismissed(index),
-                    child: GestureDetector(
-                      onLongPress: () => onPersonLongPress(index),
-                      onLongPressEnd: (_) => onPersonLongPressEnd(),
-                      child: AnimatedScale(
-                        scale: isSelected ? 1.03 : 1,
-                        duration: const Duration(milliseconds: 140),
-                        child: PersonCard(item),
-                      ),
-                    ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No entries yet',
+                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                   ),
                 ],
               ),
-            );
-          },
-        ),
       ),
     );
   }

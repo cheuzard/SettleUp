@@ -5,12 +5,12 @@ import 'Theme_info.dart';
 class Person {
   String name;
   double paid;
-  double owed;
+  double owes;
 
-  Person(this.name, this.owed, this.paid);
+  Person(this.name, this.owes, this.paid);
 
   bool _isPayed() {
-    return paid >= owed;
+    return paid >= owes;
   }
 
   Color getStatusColor() {
@@ -74,7 +74,7 @@ class _PersonCardState extends State<PersonCard> {
               children: [
                 Expanded(
                   child: Text(
-                    'Owes: \$${widget.person.owed.toStringAsFixed(2)}',
+                    'Owes: \$${widget.person.owes.toStringAsFixed(2)}',
                     style: const TextStyle(
                       color: AppColors.secondaryText,
                       fontSize: 16,
@@ -100,8 +100,8 @@ class _PersonCardState extends State<PersonCard> {
               children: [
                 Text(
                   widget.person._isPayed()
-                      ? 'Change Due: \$${(widget.person.paid - widget.person.owed).toStringAsFixed(2)}'
-                      : 'Still Owes: \$${(widget.person.owed - widget.person.paid).toStringAsFixed(2)}',
+                      ? 'Change Due: \$${(widget.person.paid - widget.person.owes).toStringAsFixed(2)}'
+                      : 'Still Owes: \$${(widget.person.owes - widget.person.paid).toStringAsFixed(2)}',
                   style: TextStyle(
                     color: widget.person.getStatusColor(),
                     fontSize: 20,
