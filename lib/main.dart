@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'rend l\'argent',
-      theme: ModernPurpleTheme.darkTheme,
+      theme: ModernPurpleTheme.lightTheme,
       darkTheme: ModernPurpleTheme.darkTheme,
       themeMode: ThemeMode.system,
       home: Scaffold(
